@@ -4,6 +4,9 @@ import { useState } from 'react'
 import { useLayoutEffect } from 'react'
 import Input from '../common/Input'
 import Button from '../common/Button'
+import api from '../core/api'
+import utilis from '../core/utilis'
+import useGlobal from '../core/global'
 const Signup = ({navigation}) => {
      //to hide the header on the navigation tab
      useLayoutEffect(()=>{
@@ -23,6 +26,7 @@ const Signup = ({navigation}) => {
     const [usernameError , setUsernameError] = useState('')
     const [password1Error , setPassword1Error] = useState('')
     const [password2Error , setPassword2Error] = useState('')
+    const login = useGlobal(state => state.login)
    
     function OnSignUp(){
 
@@ -61,7 +65,42 @@ const Signup = ({navigation}) => {
             ){
             return
         }
-        console.log(username , firstname , lastname , password1 ,password2 )
+         //make signin request
+         api({
+            method:'POST',
+            url:'/chat/signup/',
+            data:{
+              username:username,
+              first_name:firstname,
+              last_name:lastname,
+              password1:password1,
+              password2:password2,
+            }
+          })
+          .then(response =>{
+            // console.log('Sign In',response.data)
+            utilis.log('Sign Up',response.data)
+            const credentials = {
+                username:username,
+                password1:password1
+              }
+            login(credentials,response.data.user)
+          })
+          .catch(error => {
+            // console.log(error)
+            if(error.response){
+              console.log(error.response.data)
+              console.log(error.response.status)
+              console.log(error.response.headers)
+            }else if (error.request){
+              console.log(error.request);
+            }else{
+              console.log('Error',error.message);
+            }
+            console.log(error.config);
+          })
+          //.....
+        // console.log(username , firstname , lastname , password1 ,password2 )
     }
   return (
     <SafeAreaView style={{flex:1}}>

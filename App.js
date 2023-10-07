@@ -10,6 +10,7 @@ import Message from './src/screens/Message';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer , DefaultTheme } from '@react-navigation/native';
 import  './src/core/fontawesome';
+import useGlobal from './src/core/global';
 const Stack = createStackNavigator();
 
 //to change the backgroundcolour of all the screens in the App
@@ -22,7 +23,8 @@ const Lightheme = {
 }
 export default function App() {
   const [initialized] = useState(true) //to check if the user has already onboarded
-  const [authenticated] = useState(false)  //to check if the user is authenticated
+  // const [authenticated] = useState(false)  //to check if the user is authenticated
+  const authenticated = useGlobal(state=>state.authenticated)
   return (
     <NavigationContainer theme={Lightheme}>
         <StatusBar barstyle='dark-content'/>

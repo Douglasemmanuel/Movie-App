@@ -5,8 +5,9 @@ import React from 'react'
 import Tittle from '../common/Tittle'
 import Input from '../common/Input'
 import Button from '../common/Button'
-
-
+import api from '../core/api'
+import utilis from '../core/utilis'
+import useGlobal from '../core/global'
 
 
 const Sigin = ({navigation}) => {
@@ -20,6 +21,7 @@ const Sigin = ({navigation}) => {
     const [password , setPassword] = useState('')
     const [usernameError , setUsernameError] = useState('')
     const [passwordError , setPasswordError] = useState('')
+    const login = useGlobal(state => state.login)
     function onSignIn(){
         console.log('onSignIn' , username , password)
 
@@ -38,6 +40,36 @@ const Sigin = ({navigation}) => {
 
         }
         //make signin request
+        api({
+          method:'POST',
+          url:'/chat/signin/',
+          data:{
+            username:username,
+            password:password
+          }
+        })
+        .then(response =>{
+          // console.log('Sign In',response.data)
+          const credentials = {
+            username:username,
+            password:password
+          }
+          utilis.log('Sign In',response.data)
+          login( credentials,response.data.user)
+        })
+        .catch(error => {
+          // console.log(error)
+          if(error.response){
+            console.log(error.response.data)
+            console.log(error.response.status)
+            console.log(error.response.headers)
+          }else if (error.request){
+            console.log(error.request);
+          }else{
+            console.log('Error',error.message);
+          }
+          console.log(error.config);
+        })
         //.....
     }
   return (
