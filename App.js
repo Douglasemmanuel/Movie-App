@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
-import { useState } from 'react';
+import { useState , useEffect } from 'react';
 import Splash from './src/screens/Splash';
 import Home from './src/screens/Home';
 import Search from './src/screens/Search';
@@ -22,9 +22,14 @@ const Lightheme = {
   }
 }
 export default function App() {
-  const [initialized] = useState(true) //to check if the user has already onboarded
+  // const [initialized] = useState(true) //to check if the user has already onboarded
   // const [authenticated] = useState(false)  //to check if the user is authenticated
   const authenticated = useGlobal(state=>state.authenticated)
+  const initialized = useGlobal(state=>state.initialized)
+  const init = useGlobal(state=>state.init)
+  useEffect(()=>{
+    init()
+  },[])
   return (
     <NavigationContainer theme={Lightheme}>
         <StatusBar barstyle='dark-content'/>

@@ -30,7 +30,7 @@ async function remove(key ){
 }
 
 
-async function whipe(){
+async function wipe(){
     try{
         await EncryptedStorage.clear()
     }catch(error){

@@ -49,13 +49,13 @@ const Sigin = ({navigation}) => {
           }
         })
         .then(response =>{
-          // console.log('Sign In',response.data)
+        utilis.log('Sign In',response.data)
           const credentials = {
             username:username,
             password:password
           }
           utilis.log('Sign In',response.data)
-          login( credentials,response.data.user)
+          login( credentials,response.data.user , response.data.tokens)
         })
         .catch(error => {
           // console.log(error)

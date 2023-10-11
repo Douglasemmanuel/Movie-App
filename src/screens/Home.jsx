@@ -7,24 +7,46 @@ import Friends from './Friends'
 import { useLayoutEffect } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
 import { TouchableOpacity } from 'react-native'
+import useGlobal from '../core/global'
+import { useEffect } from 'react'
+import Thumbnail from '../common/Thumbnail'
 const Tab = createBottomTabNavigator()
 const Home = ({navigation}) => {
+    const socketConnect = useGlobal(state => state.socketConnect)
+    const socketClose = useGlobal(state => state.socketClose)
+    const user = useGlobal(state => state.user)
      //to hide the header on the navigation tab
      useLayoutEffect(()=>{
         navigation.setOptions({
             headerShown:false
         })
     },[])
+    useEffect(()=>{
+        socketConnect()
+        return ()=>{
+            socketClose()
+        }
+    },[])
+
+    function onSearch(){
+        navigation.navigate('search')
+    }
   return (
    <Tab.Navigator
     screenOptions={({route , navigation})=>({
         headerLeft:()=>(
             <View style={{marginLeft:16}}>
-                <Image source={require("../assests/profile.png")} style={{width:28 , height:28 , borderRadius:14 , backgroundColor:'#e0e0e0'}}/>
+                        <Thumbnail
+                url={user.thumbnail}
+                size={28}
+            />
+                {/* <Image source={require("../assests/profile.png")} style={{width:28 , height:28 , borderRadius:14 , backgroundColor:'#e0e0e0'}}/> */}
             </View>
         ),
         headerRight:()=>(
-            <TouchableOpacity>
+            <TouchableOpacity
+            onpress={onSearch}
+            >
                 <FontAwesomeIcon icon='magnifying-glass' size={22} color='#404040' style={{marginRight:16}}/>
             </TouchableOpacity>
         ),

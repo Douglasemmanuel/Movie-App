@@ -1,5 +1,6 @@
-
-
+import { Platform } from "react-native"
+import ProfileImage from "../assests/profile.png"
+import { ADDRESS } from "./api"
 
 function log(){
     //much better console.log function that formats/indents
@@ -10,8 +11,19 @@ function log(){
         if(typeof arg === 'object' ){
             arg = JSON.stringify(arg , null , 2)
         }
-        console.log(arg)
+        console.log(`[${Platform.OS}]`,arg)
     }
 }
 
-export default{log}
+
+function thumbnail(url){
+    if(!url){
+        return ProfileImage
+    }
+    return {
+        url:'http://' + ADDRESS + url
+    }
+}
+
+
+export default{log , thumbnail}
