@@ -6,7 +6,7 @@ import Empty from '../common/Empty'
 import { FlatList } from 'react-native'
 import Thumbnail from '../common/Thumbnail'
 import useGlobal from '../core/global'
-
+import Cell from '../common/Cell'
 
 function SearchButton({user}){
   //Add tick if a user is  alreadyconnected
@@ -72,15 +72,8 @@ function SearchButton({user}){
 
  function SearchRow({user}){
   return (
-    <View
-    style={{
-      paddingHorizontal:20,
-      flexDirection:'row',
-      alignItems:'center',
-      borderBottomWidth:1,
-      borderColor:'#f0f0f0',
-      height:106
-    }}>
+    <Cell>
+   
       <Thumbnail
       url={user.thumbnail}
       size={76}
@@ -111,7 +104,8 @@ function SearchButton({user}){
       </Text>
      </View>
      <SearchButton user={user}/>
-    </View>
+    
+    </Cell>
   )
  }
 

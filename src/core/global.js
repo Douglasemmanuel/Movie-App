@@ -10,6 +10,102 @@ import utilis from './utilis'
     //--------------------------
 
 
+    function  responseFriendList(set ,get , friendList){
+        set(state =>({
+            friendList:friendList
+        }))
+    }
+
+
+
+
+    //function to eable users connect together
+
+    function responseRequestConnect(set , get , connection){
+        const  user = get().user
+        // if i was the one that made the connect request, update the searcch List row
+        if(user.username === connection.sender.username){
+            //...
+            const searchList = [...get().searchList]
+            const searchIndex = searchList.findIndex(
+                request => request.username === connection.receiver.username
+            )
+            if(searchIndex >= 0){
+                searchIndex[searchIndex].status = 'pending-then'
+                set(state =>({
+                    searchList:searchList
+                }))
+            }
+            // if they were the one that sent the connect request add request to request list
+        }else{
+            const requestList = [...get().requestList]
+            const requestIndex = requestList.findIndex(
+                request => request.username === connection.receiver.username
+            )
+            if(requestIndex === -1){
+               requestList.unshift(connection)
+               set(state =>({
+                requestList:requestList
+            }))
+            }
+        }
+    }
+
+    //function to eable users accept request
+
+    function responseRequestAccept(set, get ,connection){
+        const user = get().user
+        // if i was the one taht accepted the request , remove request from th requestlist
+        if(user.username === connection.sener.username){
+            const requestList = [...get().requestList]
+            const requestIndex = requestList.findIndex(
+                request => request.id === connection.id
+            )
+            if(requestIndex >= 0){
+                requestList.splice(requestIndex , 1)
+                set(state =>({
+                    requestList:requestList
+                }))
+            }
+            
+        }
+        //If the corresponding user is connected within the search for the acceptor or the acceptee , update the state of the searchlist item
+        const sl = get().searchList
+        if(sl === null){
+            return 
+
+        }
+        const searchList = [...sl]
+        let searchIndex = -1
+        // if this user accepted
+        if(user.username === connection.receiver.username){
+            searchIndex = searchList.findIndex(
+                user => user.username === connection.sender.username
+            )
+            // if the other user accepted
+        }else{
+            searchIndex = searchList.findIndex(
+                user => user.username === connection.receiver.username
+            )
+        }
+        if(searchIndex >= 0){
+            searchList[searchIndex].status = 'connected'
+            set(state =>({
+                searchList:searchList
+            }))
+        }
+    }
+
+
+    function responseRequestList(set , get , requestList ){
+        set(state =>({
+            requestList:requestList
+        }))
+    }
+
+
+
+
    function responseThumbnail(set, get , data){
         set(state =>({
             user:data
@@ -97,6 +193,12 @@ const useGlobal = create((set , get)=>({
         const socket = new WebSocket( url )
         socket.onopen =()=>{
             utilis.log('socket.onopen')
+            socket.send(JSON.stringify({
+                source:'request.list'
+            }))
+            socket.send(JSON.stringify({
+                source:'friend.list'
+            }))
         }
         socket.onmessage =(event)=>{
             // utilis.log('socket.onmessage')
@@ -105,8 +207,12 @@ const useGlobal = create((set , get)=>({
             utilis.log('onmessage:', parsed)
 
             const response = {
-                'thumbnail': responseThumbnail,
-                'search':responseSearch
+                'friend.list':  responseFriendList,
+                'request.accept':  responseRequestAccept,
+                'request.connect':  responseRequestConnect,
+                'request.list':  responseRequestList,
+                'thumbnail':        responseThumbnail,
+                'search':          responseSearch
             }
             const resp = response[parsed.source]
             if(!resp){
@@ -161,7 +267,17 @@ const useGlobal = create((set , get)=>({
      // Requests
     //--------------------------
     
-    requestsList :null,
+    requestList :null,
+
+    requestAccept:(username)=>{
+        const socket = get().socket
+        socket.send(JSON.stringify({
+            source:request.accept,
+            username:username
+        }))
+        
+    },
+
     
     requestConnect:(username)=>{
         const socket = get().socket
@@ -172,7 +288,11 @@ const useGlobal = create((set , get)=>({
         
     },
     
-    
+      
+    //----------------------
+    // Friends
+    //--------------------------
+    friendList : null,
     
     //----------------------
     // Thumbnail
