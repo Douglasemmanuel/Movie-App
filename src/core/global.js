@@ -2,6 +2,7 @@ import {create} from 'zustand'
 import secure from './secure'
 import api, { ADDRESS } from './api'
 import utilis from './utilis'
+import { text } from '@fortawesome/fontawesome-svg-core'
 
 
 
@@ -118,7 +119,50 @@ import utilis from './utilis'
         }))
     }
 
+    function responseMessageList(set, get , data){
+        set(state =>({
+            messagesList:[...get().messageList , ...data.messages],
+            messagesNext:data.next,
+            messagesUsername:data.friend.username
+        }))
+    }
 
+    
+    function responseMessageType(set , get , data){
+        if(data.username != get().messagesUsername)return 
+        set((state)=>({
+            messagesTyping:new Date()
+        }))
+    }
+
+    function responseMessageSend(set , get , data){
+        const username = data.friend.username
+        // move friendList item for this friend to the start of list , update the preview text and update the time stamp
+        const friendList = [...get().friendList]
+        const friendIndex = friendList.findIndex(
+            item => item.friend.username === username
+        )
+        if(friendIndex >= 0){
+            const item = friendList[friendIndex]
+            item.preview = data.message.text
+            item.updated = data.message.created
+            friendList.splice(friendIndex , 1)
+            friendList.unshift(item)
+            set((state)=>({
+                friendList:friendList
+            }))
+
+        }
+        // if the message data does not belong to thus friend then dont update the  message list , as a fresh messagelist will be loaded the next time the user opens the correct chat window
+        if (username != get().messageUsername){
+            return
+        }
+        const messageList = [...data.message , ...get().messageList]
+        set((state)=>({
+            messageList:messageList,
+            messageTyping:null
+        }))
+    }
 
 
 
@@ -207,6 +251,10 @@ const useGlobal = create((set , get)=>({
             utilis.log('onmessage:', parsed)
 
             const response = {
+                'message.list':  responseMessageList,
+                'message.send': responseMessageSend,
+                'message.type': responseMessageType,
+                'friend.new': responseFriendNew,
                 'friend.list':  responseFriendList,
                 'request.accept':  responseRequestAccept,
                 'request.connect':  responseRequestConnect,
@@ -263,6 +311,58 @@ const useGlobal = create((set , get)=>({
         }
         
     },
+
+    //----------------------
+    // Messages
+    //--------------------------
+    messagesList:[],
+    messagesNext:null,
+    messagesTyping:null,
+    messagesUsername: null,
+
+    messageList :(connectionId , page=0) => {
+        if (page === 0){
+            set((state)=>({
+             messagaesList:[],
+             messagesNext:null,
+             messagesTyping:null,
+             messagesUsername: null,
+            }))
+        }else{
+            set((state)=>({
+                messageNext:null
+            }))
+        }
+        const socket = get().socket
+        socket.send(JSON.stringify({
+            source:'message.list',
+            connecionId:connectionId,
+            page:page
+        }))
+        
+    },
+
+    messageSend :(connectionId , message) => {
+        const socket = get().socket
+        socket.send(JSON.stringify({
+            source:'message.send',
+            connecionId:connectionId,
+            message:message
+        }))
+        
+    },
+
+    messageType :(username) => {
+        const socket = get().socket
+        socket.send(JSON.stringify({
+            source:'message.send',
+           username:username
+        }))
+        
+    },
+
+
+
      //----------------------
      // Requests
     //--------------------------

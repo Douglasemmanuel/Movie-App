@@ -6,6 +6,7 @@ import { FlatList } from 'react-native'
 import Cell from '../common/Cell'
 import Thumbnail from '../common/Thumbnail'
 import { TouchableOpacity } from 'react-native'
+import utilis from '../core/utilis'
 
 
 function RequestAccept({item}){
@@ -38,7 +39,7 @@ function RequestAccept({item}){
 
 function RequestRow({item}){
   const message = 'Request to connect with you'
-  const time = '7m ago'
+  // const time = '7m ago'
   return (
    <Cell>
     <Thumbnail
@@ -65,7 +66,7 @@ function RequestRow({item}){
         color:'#606060',
       }}
       >
-        {message}<Text style={{color:'#909090' , fontSize:13}}>{time}</Text>
+        {message}<Text style={{color:'#909090' , fontSize:13}}>{utilis.formatTime(item.created)}</Text>
       </Text>
       </View>
       <RequestAccept item={item}/>
